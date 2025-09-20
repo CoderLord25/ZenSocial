@@ -94,21 +94,23 @@ npm install
 3. Connect your wallet and start interacting with ZenID.
    
 ## 📂 Project Structure
+
 ZenID/
-├── ZenID.sol # Smart contract (NFT Identity + SocialFi logic)
-├── templates/ # Frontend HTML templates
-│ ├── index.html # Main dApp (create/update profile, post, like, follow)
-│ ├── stats.html # Display user stats (reputation, followers, following)
-│ ├── explore.html # Search and view other users' profiles
-│ └── article.html # Write & publish demo articles
+├── ZenID.sol              # Smart contract (NFT Identity + SocialFi logic)
+├── templates/             # Frontend HTML templates
+│   ├── index.html         # Main dApp (create/update profile, post, like, follow)
+│   ├── stats.html         # Display user stats (reputation, followers, following)
+│   ├── explore.html       # Search and view other users' profiles
+│   └── article.html       # Write & publish demo articles
 ├── static/
-│ ├── js/
-│ │ └── app.js # Frontend logic (ethers.js integration)
-│ └── images/ # Project images (backgrounds, logo)
-│ ├── zenchain1_bg.jpg
-│ └── zenchain2_bg.jpg
-├── app.py # Flask backend to serve HTML templates
-└── README.md # Project documentation
+│   ├── js/
+│   │   └── app.js         # Frontend logic (ethers.js integration)
+│   └── images/            # Project images (backgrounds, logo)
+│       ├── zenchain1_bg.jpg
+│       └── zenchain2_bg.jpg
+├── app.py                 # Flask backend to serve HTML templates
+└── README.md              # Project documentation
+
 
 ## 📝 Conclusion
 ZenID provides a minimal but complete SocialFi prototype:
