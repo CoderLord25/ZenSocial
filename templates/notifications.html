@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notifications - ZenSocial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      --bg:#000; --text:#e6e6e6; --muted:#94a3b8; --line:#2f3336;
+      --card:#0b0f14; --card2:#16181c; --accent:#A6FF4D; --link:#1d9bf0;
+      --danger:#e0245e; --ok:#17bf63;
+    }
+    *{ box-sizing:border-box }
+    body{ margin:0; font-family:"Inter",sans-serif; background:var(--bg); color:#fff; }
+    .container{ display:grid; grid-template-columns: 18% 52% 30%; height:100vh; }
+
+    /* Sidebar left */
+    .sidebar-left{ border-right:1px solid var(--line); padding:20px 15px; display:flex; flex-direction:column; justify-content:space-between; }
+    .logo{ display:flex; align-items:center; gap:10px; margin-bottom:30px; }
+    .logo i{ font-size:28px; color:var(--accent); }
+    .logo span{ font-size:26px; font-weight:700; color:var(--accent); }
+    .menu{ display:flex; flex-direction:column; gap:14px; }
+    .menu-item{ display:flex; align-items:center; gap:14px; font-size:18px; font-weight:600; padding:12px 15px; border-radius:30px; transition:.2s; color:#fff; text-decoration:none; }
+    .menu-item i{ width:22px; text-align:center; }
+    .menu-item:hover{ background:#181818; color:var(--accent); }
+    .menu-item.active{ background:#181818; }
+
+    /* Middle column */
+    .mid{ border-right:1px solid var(--line); display:flex; flex-direction:column; }
+    .mid .topbar{ display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--line); position:sticky; top:0; background:#000; z-index:2; }
+    .mid .title{ font-size:22px; font-weight:700; }
+    .tabs{ display:flex; border-bottom:1px solid var(--line); }
+    .tab{ flex:1; text-align:center; padding:12px 0; cursor:pointer; color:#cbd5e1; font-weight:600; }
+    .tab.active{ color:#fff; position:relative; }
+    .tab.active:after{ content:""; position:absolute; left:16px; right:16px; bottom:0; height:3px; background:var(--accent); border-radius:3px; }
+    .list{ overflow-y:auto; }
+
+    .notif{ display:flex; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); background:transparent; }
+    .notif:hover{ background:#0b0f14; }
+    .n-icon{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+    .n-icon.like{ color:#ff5a9e; }
+    .n-icon.follow{ color:#58a6ff; }
+    .n-icon.mention{ color:#ffd166; }
+    .n-icon i{ font-size:18px; }
+    .avatars{ display:flex; align-items:center; }
+    .avatars img{ width:34px; height:34px; border-radius:50%; object-fit:cover; border:2px solid #000; margin-left:-8px; }
+    .content{ flex:1; min-width:0; }
+    .line1{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .name{ font-weight:700; }
+    .badge{ color:#67e8f9; }
+    .time{ margin-left:auto; color:#9aa6b2; font-size:12px; }
+    .excerpt{ color:#9aa6b2; margin-top:4px; line-height:1.35; }
+
+    /* Right column */
+    .right{ padding:20px; }
+    .search-box{ margin-bottom:20px; position:relative; }
+    .search-box input{ width:100%; padding:10px 12px 10px 38px; background:#16181c; border:1px solid var(--line); border-radius:25px; color:#fff; font-size:14px; }
+    .search-box i{ position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#8899a6; }
+
+    .card{ background:#101418; border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:18px; }
+    .card h3{ margin:0 0 10px 0; font-size:18px; }
+    .trend{ display:flex; flex-direction:column; gap:6px; padding:10px 0; border-bottom:1px solid #0f1215; }
+    .trend:last-child{ border-bottom:none; }
+    .trend .meta{ color:#9aa6b2; font-size:12px; }
+    .trend .title{ font-weight:700; }
+    .show-more{ color:var(--link); cursor:pointer; font-size:14px; margin-top:8px; }
+
+    /* Small helpers */
+    .v{ color:#67e8f9; margin-left:4px; }   /* verified check color */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar Left -->
+    <div class="sidebar-left">
+      <div>
+        <div class="logo"><i class="fas fa-leaf"></i><span>ZenSocial</span></div>
+        <div class="menu">
+          <a class="menu-item" href="{{ url_for('home') }}"><i class="fas fa-home"></i> Home</a>
+          <a class="menu-item active" href="{{ url_for('notifications') }}"><i class="far fa-bell"></i> Notifications</a>
+          <a class="menu-item" href="{{ url_for('messenger') }}"><i class="far fa-envelope"></i> Messages</a>
+          <a class="menu-item" href="{{ url_for('profile') }}"><i class="far fa-user"></i> Profile</a>
+          <a class="menu-item" href="{{ url_for('earn') }}"><i class="fas fa-coins"></i> Earn</a>
+          <a class="menu-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+      </div>
+      <!-- Không có nút Post ở sidebar -->
+    </div>
+
+    <!-- Middle -->
+    <div class="mid">
+      <div class="topbar">
+        <div class="title">Notifications</div>
+        <div style="color:#cbd5e1;"><i class="fa-solid fa-gear"></i></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="all">All</div>
+        <div class="tab" data-tab="verified">Verified</div>
+        <div class="tab" data-tab="mentions">Mentions</div>
+      </div>
+
+      <div class="list" id="notifList">
+        <!-- FOLLOW -->
+        <div class="notif" data-kind="follow" data-verified="true">
+          <div class="n-icon follow"><i class="fa-regular fa-user"></i></div>
+          <div class="avatars">
+            <img src="{{ url_for('static', filename='avatars/a1.jpg') }}" onerror="this.src='{{ url_for('static', filename='default_avatar.png') }}'">
+            <img src="{{ url_for('static', filename='avatars/a2.jpg') }}" onerror="this.src='{{ url_for('static', filename='default_avatar.png') }}'">
+          </div>
+          <div class="content">
+            <div class="line1">
+              <span class="name">Kai Nguyen</span><span class="v"><i class="fa-solid fa-circle-check"></i></span>
+              <span>&</span>
+              <span class="name">River Dao</span>
+              <span>followed you</span>
+              <span class="time">9h</span>
+            </div>
+            <div class="excerpt">@kaing • @riverdao</div>
+          </div>
+        </div>
+
+        <!-- LIKE -->
+        <div class="notif" data-kind="like" data-verified="false">
+          <div class="n-icon like"><i class="fa-regular fa-heart"></i></div>
+          <div class="avatars">
+            <img src="{{ url_for('static', filename='avatars/a3.jpg') }}" onerror="this.src='{{ url_for('static', filename='default_avatar.png') }}'">
+            <img src="{{ url_for('static', filename='avatars/a4.jpg') }}" onerror="this.src='{{ url_for('static', filename='default_avatar.png') }}'">
+          </div>
+          <div class="content">
+            <div class="line1">
+              <span class="name">Mika</span> and <span class="name">Leo N.</span> liked your post
+              <span class="time">21h</span>
+            </div>
+            <div class="excerpt">“ZenID is more than an identity — it’s the key that connects you to the whole Zen ecosystem…”</div>
+          </div>
+        </div>
+
+        <!-- SECURITY ALERT (demo khác biệt) -->
+        <div class="notif" data-kind="alert" data-verified="true">
+          <div class="n-icon" style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="avatars">
+            <img src="{{ url_for('static', filename='avatars/zenshield.png') }}" onerror="this.src='{{ url_for('static', filename='default_avatar.png') }}'">
+          </div>
+          <div class="content">
+            <div class="line1">
+              <span class="name">ZenShield</span><span class="v"><i class="fa-solid fa-circle-check"></i></span>
+              <span>noticed a login from new device.</span>
+              <span class="time">Sep 20</span>
+            </div>
+            <div class="excerpt">If this wasn’t you, please secure your account now.</div>
+          </div>
+        </div>
+
+        <!-- COMMUNITY PIN -->
+        <div class="notif" data-kind="pin" data-verified="true">
+          <div class="n-icon" style="color:#60a5fa;"><i class="fa-solid fa-thumbtack"></i></div>
+          <div class="avatars">
+            <img src="{{ url_for('static', filename='images/zenchain2_bg.png') }}"
+                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/zenchain2_bg.jpg') }}';">
+          </div>
+          <div class="content">
+            <div class="line1">
+              <span class="name">ZenCommunity</span><span class="v"><i class="fa-solid fa-circle-check"></i></span>
+              <span>pinned a new post in</span> <span class="name">ZenChainCommunity</span>
+              <span class="time">Sep 18</span>
+            </div>
+            <div class="excerpt">Join us this week for a Hangout on Spaces about agents and the multi-chain future.</div>
+          </div>
+        </div>
+
+        <!-- MENTION -->
+        <div class="notif" data-kind="mention" data-verified="false">
+          <div class="n-icon mention"><i class="fa-regular fa-at"></i></div>
+          <div class="avatars">
+            <img src="{{ url_for('static', filename='avatars/a5.jpg') }}" onerror="this.src='{{ url_for('static', filename='default_avatar.png') }}'">
+          </div>
+          <div class="content">
+            <div class="line1">
+              <span class="name">Riley Dev</span> mentioned you
+              <span class="time">Sep 18</span>
+            </div>
+            <div class="excerpt">“@you the docs for ZenSDK v0.3 are 🔥 — shipping an example soon!”</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="right">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search ZenSocial">
+      </div>
+
+      <div class="card">
+        <h3>What’s happening</h3>
+        <div class="trend">
+          <div class="meta">Trending in Vietnam</div>
+          <div class="title">ZenChain v2 Launch</div>
+          <div class="meta">24K posts</div>
+        </div>
+        <div class="trend">
+          <div class="meta">Technology • Trending</div>
+          <div class="title">AI Agents for Social</div>
+          <div class="meta">18K posts</div>
+        </div>
+        <div class="trend">
+          <div class="meta">Crypto • Trending</div>
+          <div class="title">Layer-2 gas fees</div>
+          <div class="meta">12K posts</div>
+        </div>
+        <div class="show-more">Show more</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tabs filter
+    const tabs = document.querySelectorAll('.tab');
+    const items = document.querySelectorAll('.notif');
+
+    function applyFilter(which){
+      items.forEach(n => {
+        const isVerified = n.getAttribute('data-verified') === 'true';
+        const kind = n.getAttribute('data-kind');
+        let show = true;
+        if (which === 'verified') show = isVerified;
+        if (which === 'mentions') show = (kind === 'mention');
+        n.style.display = show ? 'flex' : 'none';
+      });
+    }
+
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        tabs.forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        applyFilter(t.dataset.tab);
+      });
+    });
+
+    // default
+    applyFilter('all');
+  </script>
+</body>
+</html>

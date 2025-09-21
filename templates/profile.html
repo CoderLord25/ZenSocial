@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile - ZenSocial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { margin: 0; font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+    .container { display: grid; grid-template-columns: 18% 52% 30%; height: 100vh; }
+
+    /* Sidebar Left */
+    .sidebar-left { border-right: 1px solid #2f3336; padding: 20px 15px; display: flex; flex-direction: column; justify-content: space-between; height: 100vh; }
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+    .logo i { font-size: 28px; color: #A6FF4D; }
+    .logo span { font-size: 26px; font-weight: 700; color: #A6FF4D; }
+    .menu { display: flex; flex-direction: column; gap: 20px; }
+    .menu-item { display: flex; align-items: center; font-size: 22px; font-weight: 600; cursor: pointer; gap: 15px; padding: 12px 15px; border-radius: 30px; transition: 0.2s; }
+    .menu-item a { text-decoration: none; color: #fff; display: flex; align-items: center; gap: 15px; width: 100%; }
+    .menu-item:hover { background: #181818; color: #A6FF4D; }
+    .menu-item i { font-size: 20px; width: 24px; text-align: center; }
+    .post-btn { margin-top: 20px; padding: 14px 0; background: #A6FF4D; border: none; border-radius: 30px; color: #000; cursor: pointer; width: 100%; font-size: 18px; font-weight: 700; transition: 0.2s; }
+    .post-btn:hover { background: #90e63c; }
+
+    /* Profile Content */
+    .content { padding: 20px; overflow-y: auto; }
+    .profile-header { max-width: 800px; margin: 0 auto; background: #16181c; border-radius: 12px; margin-bottom: 15px; }
+    .cover-photo { width: 100%; height: 180px; background: #2f3336; border-radius: 12px 12px 0 0; overflow: hidden; }
+    .cover-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-wrapper { position: relative; top: -40px; left: 20px; }
+    .avatar-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #000; object-fit: cover; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px 10px; margin-top: -30px; }
+    .user-info { flex-grow: 1; margin-left: 20px; }
+    .user-info h2 { margin: 0; font-size: 22px; font-weight: 700; }
+    .user-info p { margin: 5px 0; font-size: 14px; color: #ccc; }
+    .edit-btn { padding: 8px 16px; border: none; border-radius: 20px; background: #A6FF4D; color: #000; font-weight: 600; cursor: pointer; }
+    .stats { display: flex; gap: 20px; margin: 15px 0; }
+
+    /* Feed */
+    #feed { max-width: 800px; margin: 0 auto; }
+    .post-card { background:#16181c; padding:15px; margin-top:15px; border-radius:12px; }
+    .post-card-header { display:flex; align-items:flex-start; gap:10px; }
+    .post-card-header img { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+    .post-card-header .post-info { flex:1; }
+    .post-card-header .post-info h3 { margin:0; font-size:15px; }
+    .post-card-header .post-info p { margin:4px 0 0; }
+    .post-actions { display:flex; gap:30px; margin-top:10px; color:#8899a6; font-size:15px; }
+    .post-actions i { cursor:pointer; transition:0.2s; }
+    .post-actions i:hover { color:#A6FF4D; }
+
+    /* Sidebar Right */
+    .sidebar-right { padding: 20px; position: relative; }
+    .search-box { margin-bottom: 20px; position: relative; }
+    .search-box input { width: 100%; padding: 10px 12px 10px 38px; background: #16181c; border: 1px solid #2f3336; border-radius: 25px; color: #fff; font-size: 14px; }
+    .search-box i { position: absolute; top: 50%; left: 14px; transform: translateY(-50%); color: #8899a6; }
+    .trending { background: #16181c; border-radius: 16px; padding: 15px; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); }
+    .modal-content { background: #16181c; margin: 5% auto; padding: 20px; border-radius: 12px; width: 500px; color: #fff; position: relative; }
+    .close { position: absolute; top: 10px; right: 15px; font-size: 22px; cursor: pointer; }
+
+    /* Edit Profile Modal form */
+    .modal-content form { display: flex; flex-direction: column; gap: 12px; }
+    .modal-content label { font-size: 13px; color: #ccc; margin-bottom: 4px; }
+    .modal-content input[type="text"],
+    .modal-content textarea,
+    .modal-content input[type="file"] {
+      background: #2f3336; border: none; border-radius: 8px;
+      padding: 8px 10px; color: #fff; font-size: 14px; width: 100%;
+    }
+    .modal-content textarea { resize: vertical; min-height: 60px; }
+    .modal-content button[type="submit"] {
+      margin-top: 10px; padding: 10px; background: #A6FF4D; border: none;
+      border-radius: 20px; color: #000; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s;
+    }
+    .modal-content button[type="submit"]:hover { background: #90e63c; }
+  
+  /* ==== Right column: What's happening (đồng bộ với notifications) ==== */
+  .sidebar-right .card{
+    background:#101418; border:1px solid #2f3336; border-radius:16px; padding:14px; margin-top:10px;
+  }
+  .sidebar-right .card h3{ margin:0 0 10px 0; font-size:18px; }
+  .sidebar-right .trend{ display:flex; flex-direction:column; gap:6px; padding:10px 0; border-bottom:1px solid #0f1215; }
+  .sidebar-right .trend:last-child{ border-bottom:none; }
+  .sidebar-right .trend .meta{ color:#9aa6b2; font-size:12px; }
+  .sidebar-right .trend .title{ font-weight:700; }
+  .sidebar-right .show-more{ color:#1d9bf0; cursor:pointer; font-size:14px; margin-top:8px; }
+
+  /* Search box (nếu trang nào khác chút, block này sẽ đồng bộ luôn) */
+  .sidebar-right .search-box{ margin-bottom:20px; position:relative; }
+  .sidebar-right .search-box input{
+    width:100%; padding:10px 12px 10px 38px;
+    background:#16181c; border:1px solid #2f3336; border-radius:25px; color:#fff; font-size:14px;
+  }
+  .sidebar-right .search-box i{
+    position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#8899a6;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar Left -->
+    <div class="sidebar-left">
+      <div>
+        <div class="logo">
+          <i class="fas fa-leaf"></i>
+          <span>ZenSocial</span>
+        </div>
+        <div class="menu">
+          <div class="menu-item"><a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Home</a></div>
+          <div class="menu-item"><a href="{{ url_for('notifications') }}"><i class="far fa-bell"></i> Notifications</a></div>
+          <div class="menu-item"><a href="{{ url_for('messenger') }}"><i class="far fa-envelope"></i> Messages</a></div>
+          <div class="menu-item"><a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Profile</a></div>
+          <div class="menu-item"><a href="{{ url_for('earn') }}"><i class="fas fa-coins"></i> Earn</a></div>
+          <div class="menu-item"><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+        </div>
+      </div>
+      <button class="post-btn" onclick="openPostModal()">Post</button>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="content">
+      <div class="profile-header">
+        <div class="cover-photo">
+          <img src="{{ cover_url or url_for('static', filename='default_cover.jpg') }}">
+        </div>
+        <div class="avatar-wrapper">
+          <img class="avatar-img" src="{{ avatar_url or url_for('static', filename='default_avatar.png') }}">
+        </div>
+        <div class="header">
+          <div class="user-info">
+            <h2>@{{ username }}</h2>
+            <p>{{ bio or "This is my ZenSocial profile." }}</p>
+            <div class="stats">
+              <div><b>{{ following }}</b> Following</div>
+              <div><b>{{ followers }}</b> Followers</div>
+            </div>
+          </div>
+          <button class="edit-btn" onclick="openModal()">Edit Profile</button>
+        </div>
+      </div>
+
+      <!-- Feed -->
+      <div id="feed">
+        {% if posts %}
+          {% for post in posts %}
+          <div class="post-card" data-id="{{ post.id }}" onclick="toggleComments({{ post.id }})">
+            <div class="post-card-header">
+              <img src="{{ avatar_url or url_for('static', filename='default_avatar.png') }}">
+              <div class="post-info">
+                <h3>@{{ username }}</h3>
+                <p>{{ post.content if post is mapping else post }}</p>
+                {% if post.media %}
+                  <img src="{{ post.media }}" style="max-width:100%; margin-top:8px; border-radius:10px;">
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="post-actions" onclick="event.stopPropagation();">
+              <span>
+                <i class="far fa-comment" onclick="openCommentModal({{ post.id }})"></i>
+                <span id="comments-{{ post.id }}">{{ post.comments }}</span>
+              </span>
+              <span>
+                <i class="fas fa-retweet" onclick="repostPost({{ post.id }})" id="repost-icon-{{ post.id }}"></i>
+                <span id="shares-{{ post.id }}">{{ post.shares }}</span>
+              </span>
+              <span>
+                <i class="far fa-heart" onclick="likePost({{ post.id }})" id="like-icon-{{ post.id }}"></i>
+                <span id="likes-{{ post.id }}">{{ post.likes }}</span>
+              </span>
+              <i class="fas fa-share"></i>
+            </div>
+
+            <!-- Comment List (ẩn mặc định, click cả post mới hiện) -->
+            <div class="comments" id="comments-list-{{ post.id }}" style="display:none; margin-top:10px; font-size:14px; color:#ccc;">
+              {% for c in post.comments_list %}
+                <div class="comment-item"><b>@{{ c.username }}</b>: {{ c.content }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p id="noPostText">No posts yet...</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar Right -->
+    <div class="sidebar-right">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search">
+      </div>
+
+    <div class="card whats">
+      <h3>What’s happening</h3>
+
+      <div class="trend">
+        <div class="meta">Trending in Vietnam</div>
+        <div class="title">ZenChain v2 Launch</div>
+        <div class="meta">24K posts</div>
+      </div>
+
+      <div class="trend">
+        <div class="meta">Technology • Trending</div>
+        <div class="title">AI Agents for Social</div>
+        <div class="meta">18K posts</div>
+      </div>
+
+      <div class="trend">
+        <div class="meta">Crypto • Trending</div>
+        <div class="title">Layer-2 gas fees</div>
+        <div class="meta">12K posts</div>
+      </div>
+
+      <div class="show-more">Show more</div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Profile -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Edit Profile</h2>
+      <form id="editForm" method="POST" enctype="multipart/form-data">
+        <label>Cover Photo</label>
+        <input type="file" name="cover">
+
+        <label>Avatar</label>
+        <input type="file" name="avatar">
+
+        <label>Name</label>
+        <input type="text" name="username" value="{{ username }}">
+
+        <label>Bio</label>
+        <textarea name="bio">{{ bio }}</textarea>
+
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal New Post -->
+  <div id="postModal" class="modal">
+    <div class="modal-content" style="padding:15px;">
+      <span class="close" onclick="closePostModal()" style="position:absolute; top:10px; left:15px; font-size:20px; cursor:pointer;">&times;</span>
+      <span style="position:absolute; top:12px; right:20px; font-size:13px; color:#8899a6; cursor:pointer;">Drafts</span>
+      
+      <div style="margin-top:35px; margin-bottom:10px; display:flex; align-items:center; gap:10px;">
+        <img src="{{ avatar_url or url_for('static', filename='default_avatar.png') }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+        <select style="background:#16181c; color:#A6FF4D; border:none; font-size:13px; cursor:pointer;">
+          <option>Everyone</option>
+          <option>Followers only</option>
+        </select>
+      </div>
+
+      <textarea id="postContent" placeholder="What's happening?" rows="3" style="width:100%; background:#000; color:#fff; border:none; resize:none; font-size:16px; padding:10px;"></textarea>
+      <input type="file" id="postMedia" accept="image/*,video/*" style="display:none;">
+
+      <p style="font-size:12px; color:#1d9bf0; margin:5px 0 10px;">Everyone can reply</p>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+        <div style="display:flex; gap:15px; color:#1d9bf0; font-size:16px;">
+          <i class="far fa-image" style="cursor:pointer;" onclick="document.getElementById('postMedia').click()"></i>
+          <i class="fas fa-poll-h" style="cursor:pointer;" onclick="alert('Poll feature coming soon!')"></i>
+          <i class="far fa-smile" style="cursor:pointer;" onclick="alert('Emoji picker coming soon!')"></i>
+          <i class="fas fa-map-marker-alt" style="cursor:pointer;" onclick="alert('Location feature coming soon!')"></i>
+        </div>
+        <button onclick="submitPost()" style="padding:6px 18px; background:#A6FF4D; border:none; border-radius:20px; color:#000; font-weight:600; cursor:pointer; font-size:14px;">Post</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Comment -->
+  <div id="commentModal" class="modal">
+    <div class="modal-content" style="padding:15px;">
+      <span class="close" onclick="closeCommentModal()" style="position:absolute; top:10px; right:15px; cursor:pointer;">&times;</span>
+      <h3>Write a comment</h3>
+      <textarea id="commentContent" rows="3" style="width:100%; background:#000; color:#fff; border:none; resize:none; font-size:14px; padding:8px;"></textarea>
+      <button onclick="submitComment()" style="margin-top:10px; padding:8px 15px; background:#A6FF4D; border:none; border-radius:20px; color:#000; font-weight:600; cursor:pointer;">Comment</button>
+    </div>
+  </div>
+
+  <script>
+    // Modal Edit Profile
+    function openModal() { document.getElementById("editModal").style.display = "block"; }
+    function closeModal() { document.getElementById("editModal").style.display = "none"; }
+
+    document.getElementById("editForm").onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const response = await fetch("/edit_profile", { method: "POST", body: formData });
+      if (response.ok) window.location.reload();
+      else alert("Update failed");
+    }
+
+    // Modal New Post
+    function openPostModal() { document.getElementById("postModal").style.display = "block"; }
+    function closePostModal() { document.getElementById("postModal").style.display = "none"; }
+
+    async function submitPost() {
+      const content = document.getElementById("postContent").value.trim();
+      const media = document.getElementById("postMedia").files[0];
+      if (!content && !media) { alert("Write something or add media!"); return; }
+
+      const formData = new FormData();
+      formData.append("content", content);
+      if (media) formData.append("media", media);
+
+      const response = await fetch("/create_post", { method: "POST", body: formData });
+      if (response.ok) {
+        const data = await response.json();   // lấy post_id từ backend
+        const postId = data.post_id;
+
+        const noText = document.getElementById("noPostText");
+        if (noText) noText.remove();
+
+        const feed = document.getElementById("feed");
+        const newPost = document.createElement("div");
+        newPost.className = "post-card";
+        newPost.setAttribute("data-id", postId);
+        newPost.innerHTML = `
+          <div class="post-card-header">
+            <img src="{{ avatar_url or url_for('static', filename='default_avatar.png') }}">
+            <div class="post-info">
+              <h3>@{{ username }}</h3>
+              <p>${content}</p>
+            </div>
+          </div>
+          <div class="post-actions">
+            <span>
+              <i class="far fa-comment" onclick="openCommentModal(${postId})"></i>
+              <span id="comments-${postId}">0</span>
+            </span>
+            <span>
+              <i class="fas fa-retweet" onclick="repostPost(${postId})" id="repost-icon-${postId}"></i>
+              <span id="shares-${postId}">0</span>
+            </span>
+            <span>
+              <i class="far fa-heart" onclick="likePost(${postId})" id="like-icon-${postId}"></i>
+              <span id="likes-${postId}">0</span>
+            </span>
+            <i class="fas fa-share"></i>
+          </div>
+
+          <!-- chỗ comment ẩn mặc định -->
+          <div class="comments" id="comments-list-${postId}" style="display:none; margin-top:10px; font-size:14px; color:#ccc;"></div>
+        `;
+
+        feed.prepend(newPost);
+
+        closePostModal();
+        document.getElementById("postContent").value = "";
+        document.getElementById("postMedia").value = "";
+      } else {
+        alert("Post failed");
+      }
+    }
+
+    // Like / Repost / Comment functions
+    async function likePost(postId) {
+  const res = await fetch(`/like_post/${postId}`, { method: "POST" });
+  if (res.ok) {
+    const data = await res.json();
+    const span = document.getElementById(`likes-${postId}`);
+    const icon = document.getElementById(`like-icon-${postId}`);
+
+    if (data.status === "liked") {
+      span.textContent = parseInt(span.textContent) + 1;
+      icon.classList.remove("far"); icon.classList.add("fas");
+      icon.style.color = "#e0245e";
+    } else {
+      span.textContent = parseInt(span.textContent) - 1;
+      icon.classList.remove("fas"); icon.classList.add("far");
+      icon.style.color = "";
+    }
+  } else alert("Like failed");
+}
+
+async function repostPost(postId) {
+  const res = await fetch(`/repost_post/${postId}`, { method: "POST" });
+  if (res.ok) {
+    const data = await res.json();
+    const span = document.getElementById(`shares-${postId}`);
+    const icon = document.getElementById(`repost-icon-${postId}`);
+
+    if (data.status === "reposted") {
+      span.textContent = parseInt(span.textContent) + 1;
+      icon.style.color = "#17bf63";
+    } else {
+      span.textContent = parseInt(span.textContent) - 1;
+      icon.style.color = "";
+    }
+  } else alert("Repost failed");
+}
+
+async function submitComment() {
+  const content = document.getElementById("commentContent").value.trim();
+  if (!content) { alert("Write something!"); return; }
+
+  const res = await fetch(`/comment_post/${currentCommentPostId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content })
+  });
+
+  if (res.ok) {
+    const data = await res.json(); // { username, content }
+
+    // thêm cmt mới vào list
+    const list = document.getElementById(`comments-list-${currentCommentPostId}`);
+    if (list) {
+      const div = document.createElement("div");
+      div.className = "comment-item";
+      div.innerHTML = `<b>@${data.username}</b>: ${data.content}`;
+      list.appendChild(div);
+      list.style.display = "block"; // hiện luôn nếu đang ẩn
+    }
+
+    // update số cmt
+    const span = document.getElementById(`comments-${currentCommentPostId}`);
+    if (span) span.textContent = parseInt(span.textContent) + 1;
+
+    closeCommentModal();
+    document.getElementById("commentContent").value = "";
+  } else {
+    alert("Comment failed");
+  }
+}
+
+function toggleComments(postId) {
+  const list = document.getElementById(`comments-list-${postId}`);
+  if (list.style.display === "none" || list.style.display === "") {
+    list.style.display = "block";
+  } else {
+    list.style.display = "none";
+  }
+}
+
+let currentCommentPostId = null;
+
+function openCommentModal(postId) {
+  currentCommentPostId = postId;
+  document.getElementById("commentModal").style.display = "block";
+}
+
+function closeCommentModal() {
+  document.getElementById("commentModal").style.display = "none";
+  }
+
+  </script>
+</body>
+</html>
