@@ -14,11 +14,11 @@ def init_db():
     c = conn.cursor()
 
     if first_time:
-        # Bảng users
         c.execute("""
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                zenid TEXT UNIQUE NOT NULL,
+                zenid TEXT UNIQUE,
+                wallet TEXT UNIQUE,
                 username TEXT,
                 bio TEXT,
                 avatar TEXT,
@@ -188,8 +188,12 @@ def profile():
     c = conn.cursor()
     # lấy thông tin user
     c.execute(
-        "SELECT id, username, bio, avatar, cover, followers, following FROM users WHERE zenid=?",
-        (zenid,),
+        """
+        SELECT id, username, bio, avatar, cover, followers, following 
+        FROM users 
+        WHERE zenid=? OR wallet=?
+        """,
+        (zenid, zenid),
     )
     row = c.fetchone()
 
@@ -538,6 +542,29 @@ def notifications():
         username=username or (zenid[:6] + "..."),
         avatar_url=avatar or url_for("static", filename="default_avatar.png"),
     )
+    
+@app.route("/wallet_login", methods=["POST"])
+def wallet_login():
+    data = request.get_json()
+    wallet = data.get("wallet")
+
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE wallet=?", (wallet,))
+    row = c.fetchone()
+
+    if row:
+        # user đã có sẵn → login
+        session["zenid"] = wallet
+        conn.close()
+        return jsonify({"success": True})
+    else:
+        # tạo user mới
+        c.execute("INSERT INTO users (wallet, username) VALUES (?, ?)", (wallet, f"user_{wallet[:6]}"))
+        conn.commit()
+        session["zenid"] = wallet
+        conn.close()
+        return jsonify({"success": True})
 
 @app.route("/logout")
 def logout():
