@@ -89,6 +89,8 @@
       <p>Do you already own a ZenID?</p>
       <button class="btn" onclick="showLogin()">Login with ZenID</button>
       <button class="btn" onclick="mintZenID()">Mint ZenID</button>
+      <!-- Nút Connect Wallet -->
+      <button class="btn" onclick="connectWallet()">Connect Wallet</button>
     </div>
 
     <!-- ZenID Login -->
@@ -110,6 +112,15 @@
   </div>
 
   <script>
+    // Kiểm tra MetaMask khi load trang
+    window.addEventListener("load", () => {
+      if (typeof window.ethereum === "undefined") {
+        console.warn("MetaMask not found. Please install it to use Connect Wallet.");
+      } else {
+        console.log("MetaMask detected:", window.ethereum);
+      }
+    });
+
     function showLogin() {
       document.getElementById("step1").style.display = "none";
       document.getElementById("mintSuccess").style.display = "none";
@@ -157,6 +168,43 @@
       form.appendChild(input);
       document.body.appendChild(form);
       form.submit();
+    }
+
+    // Hàm Connect Wallet đã sửa
+    async function connectWallet() {
+      if (typeof window.ethereum === "undefined") {
+        alert("MetaMask chưa được cài hoặc chưa bật trên trình duyệt!");
+        return;
+      }
+
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        if (!accounts || accounts.length === 0) {
+          alert("Không tìm thấy tài khoản ví nào!");
+          return;
+        }
+
+        const walletAddress = accounts[0];
+        console.log("Connected wallet:", walletAddress);
+        alert("Đã kết nối ví: " + walletAddress);
+
+        // Gửi địa chỉ ví về server để login
+        const res = await fetch("/wallet_login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet: walletAddress })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = "/profile";
+        } else {
+          alert("Wallet login failed: " + (data.error || ""));
+        }
+      } catch (err) {
+        console.error("Connect wallet error:", err);
+        alert("Kết nối ví thất bại hoặc bạn đã từ chối!");
+      }
     }
   </script>
 </body>
